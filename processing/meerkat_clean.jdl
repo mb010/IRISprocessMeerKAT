@@ -1,0 +1,19 @@
+[
+JobName = "meerkat_clean";
+InputSandbox = {"meerkat_clean.sh", "myconfig.txt", "IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
+InputData = {"%container_loc/casameer-5.4.1.xvfb.simg", "%output_data_loc/combinedMMS.tar.gz"};
+
+Tags = {"skatelescope.eu.hmem", "32Processors"};
+
+Executable = "meerkat_clean.sh";
+Site = "LCG.UKI-NORTHGRID-MAN-HEP.uk";
+Arguments = "%j %n %s";
+Platform = "EL7";
+
+OutputSE = "UKI-NORTHGRID-MAN-HEP-disk";
+OutputData = {"%output_data_loc/combinedCLEANED.tar.gz"};
+
+OutputSandbox = {"StdOut", "StdErr", "myconfig_%j.txt", "fullSPWplots.tar.gz", "prmon.txt"};
+StdOutput = "StdOut";
+StdError = "StdErr";
+]

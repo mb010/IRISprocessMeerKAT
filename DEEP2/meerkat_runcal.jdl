@@ -1,0 +1,23 @@
+[
+JobName = "meerkat_runcal_%s";
+InputSandbox = {"meerkat_runcal.sh","myconfig.txt","IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
+InputData = {"LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.%s.mms.tar.gz", "LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/meerkat.xvfb.simg", "LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/casameer-5.4.1.xvfb.simg"};
+
+Tags = {"skatelescope.eu.hmem","2Processors"};
+
+Executable = "meerkat_runcal.sh";
+Site = "LCG.UKI-NORTHGRID-MAN-HEP.uk";
+Arguments = "%j %n %s";
+Platform = "EL7";
+
+Parameters = {"880.0~930.0MHz", "930.0~980.0MHz", "980.0~1030.0MHz", "1030.0~1080.0MHz", "1080.0~1130.0MHz", "1130.0~1180.0MHz", "1280.0~1330.0MHz", "1330.0~1380.0MHz", "1380.0~1430.0MHz", "1430.0~1480.0MHz", "1480.0~1530.0MHz", "1630.0~1680.0MHz"};
+
+OutputSE = "UKI-NORTHGRID-MAN-HEP-disk";
+OutputData = {"LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/images_%s.tar.gz",
+"LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/caltables_%s.tar.gz",
+"LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/outputMMS_%s.tar.gz"};
+
+OutputSandbox = {"StdOut", "StdErr", "myconfig_%s.txt", "plots_%s.tar.gz", "prmon.txt"};
+StdOutput = "StdOut";
+StdError = "StdErr";
+]

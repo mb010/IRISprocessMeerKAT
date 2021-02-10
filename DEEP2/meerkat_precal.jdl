@@ -1,0 +1,19 @@
+[
+JobName = "meerkat_precal";
+InputSandbox = {"meerkat_precal.sh","myconfig.txt","IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
+InputData = {"LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets/1491550051.ms.tar.gz", "LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/meerkat.xvfb.simg", "LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/casameer-5.4.1.xvfb.simg"};
+
+Tags = {"skatelescope.eu.hmem","8Processors"};
+
+Executable = "meerkat_precal.sh";
+Site = "LCG.UKI-NORTHGRID-MAN-HEP.uk";
+Arguments = "%j %n %s";
+Platform = "EL7";
+
+OutputSE = "UKI-NORTHGRID-MAN-HEP-disk";
+OutputData = {"LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.880.0~930.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.930.0~980.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.980.0~1030.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1030.0~1080.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1080.0~1130.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1130.0~1180.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1280.0~1330.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1330.0~1380.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1380.0~1430.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1430.0~1480.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1480.0~1530.0MHz.mms.tar.gz", "LFN:/skatelescope.eu/user/m/micah.bowles/meerkat/1491550051/1491550051.1630.0~1680.0MHz.mms.tar.gz"};
+
+OutputSandbox = {"StdOut", "StdErr", "1491550051_listobs.txt", "myconfig_%j.txt", "prmon.txt"};
+StdOutput = "StdOut";
+StdError = "StdErr";
+]

@@ -1,0 +1,5 @@
+dev.ipynb
+*.ipynb_checkpoints
+DEEP2/28219680/clean_output/
+DEEP2/28219680/
+pipelines/
