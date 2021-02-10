@@ -9,11 +9,11 @@ import time
 
 
 # options for debugging purposes
-precal = True
+precal = False
 runcal = False
 slfcal = False
-concat = False
-clean = False
+concat = True
+clean = True
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -51,7 +51,7 @@ def get_status(filename):
 # ---------------------------------------------------------------------
 
 def run_precal():
-	
+
 	# submit job:
 	os.system("dirac-wms-job-submit meerkat_precal.jdl > .tmp \n")
 	jobid_precal = get_jobid('.tmp')
@@ -85,26 +85,26 @@ def run_precal():
 		os.system("mv myconfig.txt .tmp \n")
 		configfile = open('myconfig.txt',"w")
 		for i, line in enumerate(open('.tmp')):
-			if line.find("bpassfield")>-1: 
+			if line.find("bpassfield")>-1:
 				tmp = line.split()[-1]
 				line = line.replace(tmp,bpassfield)
-			if line.find("fluxfield")>-1: 
+			if line.find("fluxfield")>-1:
 				tmp = line.split()[-1]
 				line = line.replace(tmp,fluxfield)
-			if line.find("phasecalfield")>-1: 
+			if line.find("phasecalfield")>-1:
 				tmp = line.split()[-1]
 				line = line.replace(tmp,phasecalfield)
-			if line.find("targetfields")>-1: 
+			if line.find("targetfields")>-1:
 				tmp = line.split()[-1]
 				line =line.replace(tmp,targetfields)
-			if line.find("extrafields")>-1: 
+			if line.find("extrafields")>-1:
 				tmp = line.split()[-1]
 				line = line.replace(tmp,extrafields)
-			if line.find("polfield")>-1: 
+			if line.find("polfield")>-1:
 				tmp = line.split()[-1]
 				line = line.replace(tmp,polfield)
 			configfile.write(line)
-				
+
 		configfile.close()
 		os.system("rm -r "+jobid_precal+" \n")
 		os.system("rm -r .tmp \n")
@@ -125,7 +125,7 @@ def run_runcal():
 	os.system("dirac-wms-job-submit meerkat_runcal.jdl > .tmp \n")
 	jobid_runcal = get_jobid('.tmp')
 	print("Running runcal: "+" ".join(jobid_runcal))
-	
+
 	# get job status:
 	while True:
 		finished, success = [], []
@@ -165,7 +165,7 @@ def run_slfcal():
 	os.system("dirac-wms-job-submit meerkat_slfcal.jdl > .tmp \n")
 	jobid_slfcal = get_jobid('.tmp')
 	print("Running slfcal: "+jobid_slfcal)
-	
+
 	# get job status:
 	while True:
 		os.system("dirac-wms-job-status "+jobid_slfcal+" > .tmp\n")
@@ -193,7 +193,7 @@ def run_concat():
 	os.system("dirac-wms-job-submit meerkat_concat.jdl > .tmp \n")
 	jobid_slfcal = get_jobid('.tmp')
 	print("Running concat: "+jobid_slfcal)
-	
+
 	# get job status:
 	while True:
 		os.system("dirac-wms-job-status "+jobid_slfcal+" > .tmp\n")
@@ -216,15 +216,15 @@ def run_concat():
 # ---------------------------------------------------------------------
 
 def run_clean():
-	
-	
+
+
 	# update config file for clean:
 	#os.system("dirac-wms-job-get-output "+jobid_precal+" \n") # Gets output files
 	os.system("cp myconfig.txt .config_tmp \n")
 	for i, line in enumerate(open('.config_tmp')):
 		if line.find("targetfields")> -1: targetfield_int = int(line.split()[-1].strip(",[]'"))
 		if line.find("fieldnames")> -1: targetfield_str = line.split()[2:][targetfield_int].strip("',[]")
-	
+
 	configfile = open('myconfig.txt',"w")
 	for i, line in enumerate(open('.config_tmp')):
 		if line.find("vis")>-1:
@@ -239,11 +239,11 @@ def run_clean():
 	os.system("dirac-wms-job-submit meerkat_clean.jdl > .tmp \n")
 	os.system("cp .config_tmp myconfig.txt")
 	os.system("rm -r .config_tmp \n")
-	
+
 	jobid_clean = get_jobid('.tmp')
 	print(jobid_clean)
 	print("Running clean: "+jobid_clean)
-	
+
 	# get job status:
 	while True:
 		os.system("dirac-wms-job-status "+jobid_clean+" > .tmp\n")
@@ -263,7 +263,7 @@ def run_clean():
 
 	return
 
-	
+
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -277,15 +277,15 @@ if __name__ == '__main__':
 		time_precal = time.time()
 		run_precal()
 		print("precal time:\t",time.time() - time_precal, " seconds")
-	if runcal: 
+	if runcal:
 		time_precal = time.time()
 		run_runcal()
 		print("runcal time:\t",time.time() - time_precal, " seconds")
-	if slfcal: 
+	if slfcal:
 		time_precal = time.time()
 		run_slfcal()
 		print("slfcal time:\t",time.time() - time_precal, " seconds")
-	if concat: 
+	if concat:
 		time_precal = time.time()
 		run_concat()
 		print("concat time:\t",time.time() - time_precal, " seconds")

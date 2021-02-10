@@ -109,4 +109,3 @@ tar -cvzf combinedFITS.tar.gz *.fits
 tar -cvzf combinedCUBE.tar.gz *.contcube
 
 /bin/ls -la
-

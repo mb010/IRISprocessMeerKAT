@@ -3,8 +3,9 @@
 
 The IRIS MeerKAT pipeline is a radio interferometric calibration pipeline designed to process MeerKAT data. It is built on the [IDIA MeerKAT pipeline](https://github.com/idia-astro/pipelines) **It is under heavy development, and so far only implements the cross-calibration steps, and quick-look images.**
 
-## Requirements
+This ReadMe is currently out of date, and will be updated soon to reflect the true functionality of this repo.
 
+## Requirements
 This pipeline is designed to run on the IRIS grid infrastructure, making use of DIRAC and MPICASA. Currently, use of the pipeline requires access to the IRIS SKA VO.
 
 ## Quick Start

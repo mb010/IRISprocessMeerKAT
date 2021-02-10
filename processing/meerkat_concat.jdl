@@ -1,7 +1,44 @@
 [
 JobName = "meerkat_concat";
-InputSandbox = {"meerkat_concat.sh","myconfig.txt","IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
-InputData = {"%ms_loc", "%output_data_loc/outputMMS_880.0~930.0MHz.tar.gz", "%output_data_loc/outputMMS_930.0~980.0MHz.tar.gz", "%output_data_loc/outputMMS_980.0~1030.0MHz.tar.gz", "%output_data_loc/outputMMS_1030.0~1080.0MHz.tar.gz", "%output_data_loc/outputMMS_1080.0~1130.0MHz.tar.gz", "%output_data_loc/outputMMS_1130.0~1180.0MHz.tar.gz", "%output_data_loc/outputMMS_1280.0~1330.0MHz.tar.gz", "%output_data_loc/outputMMS_1330.0~1380.0MHz.tar.gz", "%output_data_loc/outputMMS_1380.0~1430.0MHz.tar.gz", "%output_data_loc/outputMMS_1430.0~1480.0MHz.tar.gz", "%output_data_loc/outputMMS_1480.0~1530.0MHz.tar.gz", "%output_data_loc/outputMMS_1630.0~1680.0MHz.tar.gz", "%output_data_loc/images_880.0~930.0MHz.tar.gz", "%output_data_loc/images_930.0~980.0MHz.tar.gz", "%output_data_loc/images_980.0~1030.0MHz.tar.gz", "%output_data_loc/images_1030.0~1080.0MHz.tar.gz", "%output_data_loc/images_1080.0~1130.0MHz.tar.gz", "%output_data_loc/images_1130.0~1180.0MHz.tar.gz", "%output_data_loc/images_1280.0~1330.0MHz.tar.gz", "%output_data_loc/images_1330.0~1380.0MHz.tar.gz", "%output_data_loc/images_1380.0~1430.0MHz.tar.gz", "%output_data_loc/images_1430.0~1480.0MHz.tar.gz", "%output_data_loc/images_1480.0~1530.0MHz.tar.gz", "%output_data_loc/images_1630.0~1680.0MHz.tar.gz", "%output_data_loc/caltables_880.0~930.0MHz.tar.gz", "%output_data_loc/caltables_930.0~980.0MHz.tar.gz", "%output_data_loc/caltables_980.0~1030.0MHz.tar.gz", "%output_data_loc/caltables_1030.0~1080.0MHz.tar.gz", "%output_data_loc/caltables_1080.0~1130.0MHz.tar.gz", "%output_data_loc/caltables_1130.0~1180.0MHz.tar.gz", "%output_data_loc/caltables_1280.0~1330.0MHz.tar.gz", "%output_data_loc/caltables_1330.0~1380.0MHz.tar.gz", "%output_data_loc/caltables_1380.0~1430.0MHz.tar.gz", "%output_data_loc/caltables_1430.0~1480.0MHz.tar.gz", "%output_data_loc/caltables_1480.0~1530.0MHz.tar.gz", "%output_data_loc/caltables_1630.0~1680.0MHz.tar.gz", "LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/casameer-5.4.1.xvfb.simg"};
+InputSandbox = {"meerkat_concat.sh", "myconfig.txt", "IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
+InputData = {"%ms_loc",
+"%output_data_loc/outputMMS_880.0~930.0MHz.tar.gz",
+"%output_data_loc/outputMMS_930.0~980.0MHz.tar.gz",
+"%output_data_loc/outputMMS_980.0~1030.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1030.0~1080.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1080.0~1130.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1130.0~1180.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1280.0~1330.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1330.0~1380.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1380.0~1430.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1430.0~1480.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1480.0~1530.0MHz.tar.gz",
+"%output_data_loc/outputMMS_1630.0~1680.0MHz.tar.gz",
+"%output_data_loc/images_880.0~930.0MHz.tar.gz",
+"%output_data_loc/images_930.0~980.0MHz.tar.gz",
+"%output_data_loc/images_980.0~1030.0MHz.tar.gz",
+"%output_data_loc/images_1030.0~1080.0MHz.tar.gz",
+"%output_data_loc/images_1080.0~1130.0MHz.tar.gz",
+"%output_data_loc/images_1130.0~1180.0MHz.tar.gz",
+"%output_data_loc/images_1280.0~1330.0MHz.tar.gz",
+"%output_data_loc/images_1330.0~1380.0MHz.tar.gz",
+"%output_data_loc/images_1380.0~1430.0MHz.tar.gz",
+"%output_data_loc/images_1430.0~1480.0MHz.tar.gz",
+"%output_data_loc/images_1480.0~1530.0MHz.tar.gz",
+"%output_data_loc/images_1630.0~1680.0MHz.tar.gz",
+"%output_data_loc/caltables_880.0~930.0MHz.tar.gz",
+"%output_data_loc/caltables_930.0~980.0MHz.tar.gz",
+"%output_data_loc/caltables_980.0~1030.0MHz.tar.gz",
+"%output_data_loc/caltables_1030.0~1080.0MHz.tar.gz",
+"%output_data_loc/caltables_1080.0~1130.0MHz.tar.gz",
+"%output_data_loc/caltables_1130.0~1180.0MHz.tar.gz",
+"%output_data_loc/caltables_1280.0~1330.0MHz.tar.gz",
+"%output_data_loc/caltables_1330.0~1380.0MHz.tar.gz",
+"%output_data_loc/caltables_1380.0~1430.0MHz.tar.gz",
+"%output_data_loc/caltables_1430.0~1480.0MHz.tar.gz",
+"%output_data_loc/caltables_1480.0~1530.0MHz.tar.gz",
+"%output_data_loc/caltables_1630.0~1680.0MHz.tar.gz",
+"LFN:/skatelescope.eu/user/a/anna.scaife/meerkat/casameer-5.4.1.xvfb.simg"};
 
 Tags = {"skatelescope.eu.hmem","16Processors"};
 
@@ -11,7 +48,10 @@ Arguments = "%j %n %s";
 Platform = "EL7";
 
 OutputSE = "UKI-NORTHGRID-MAN-HEP-disk";
-OutputData = {"%output_data_loc/combinedMMS.tar.gz", "%output_data_loc/combinedFITS.tar.gz", "%output_data_loc/combinedCUBE.tar.gz"};
+OutputData = {
+"%output_data_loc/combinedMMS.tar.gz",
+"%output_data_loc/combinedFITS.tar.gz",
+"%output_data_loc/combinedCUBE.tar.gz"};
 
 OutputSandbox = {"StdOut", "StdErr", "myconfig_%j.txt", "fullSPWplots.tar.gz", "prmon.txt"};
 StdOutput = "StdOut";
