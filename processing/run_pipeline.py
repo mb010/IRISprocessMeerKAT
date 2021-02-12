@@ -18,6 +18,49 @@ clean = True
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 
+def parameter_update(filename, tag, inp_list):
+    """Updates lines of a file which contain tag to contain multiple lines
+	which cover the whole inp_list.
+    Arguments:
+    - filename (str) is the name of the file to be update.
+    - tag (str) is the key which will be used to determine which lines (and
+	where) need to be updated.
+    - inp_list (list of str) is the elements which will replace the tag
+    """
+    with open(filename, 'r') as file:
+        content = file.readlines()
+    # Check each line for tag and replace / append as reuquired
+    for idx, line in enumerate(content):
+        found = line.find(tag)
+        if found > -1:
+            tmp = line.replace(tag,inp_list[0]).rstrip(" \n,")+",\n"
+            for n in inp_list[1:]:
+                tmp += line.replace(tag, n).rstrip(" \n,")+",\n"
+            content[idx] = tmp
+    out = "".join(content) # String for writing out.
+    out = out.replace(",\n}", "\n}") # Remove commas if at end of a block.
+    with open(filename, 'w') as w:
+        w.write(out)
+
+# ---------------------------------------------------------------------
+
+def get_fieldnames(file='myconfig.txt'):
+	"""Extracts fieldnames from config file. Removes leading J to match
+	nomenclature in measurement sets.
+	"""
+    raw = 'NoneA'
+    with open(file, 'r') as r:
+        for line in r:
+            if line.find('fieldnames') > -1:
+                raw = line.split()
+    fieldnames = []
+    for i in raw:
+        if "J" in i:
+            fieldnames.append(i.strip("',J[]"))
+    return fieldnames
+
+# ---------------------------------------------------------------------
+
 def get_jobid(filename):
 
 	tmpfile = open(filename,"r")
@@ -120,6 +163,24 @@ def run_precal():
 # ---------------------------------------------------------------------
 
 def run_runcal():
+
+	# Update runcal outputs to be seperated by field
+	# Seperate job outputs by field
+	fieldnames = get_fieldnames('myconfig.txt')
+	# Convert fieldnames python list into a bash list
+	bash_fieldnames = "'"
+	for idx, i in enumerate(fnames):
+	    bash_fieldnames += i
+	    print(idx, len(fnames))
+	    if idx<len(fnames)-1:
+	        bash_fieldnames += " "
+	# Update names of tar balls in .sh
+	with open("meerkat_runcal.sh", 'w') as w:
+		with open("meerkat_runcal.sh", 'r') as r:
+			for line in r:
+				line.replace("%fieldnames", bash_fieldnames)
+	# Update names of .jdl output
+	parameter_update("tmp_runcal.jdl", "%fieldname", fieldnames)
 
 	# submit job:
 	os.system("dirac-wms-job-submit meerkat_runcal.jdl > .tmp \n")

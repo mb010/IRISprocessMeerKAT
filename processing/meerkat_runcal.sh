@@ -99,9 +99,14 @@ time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C meerka
 # create outputs:
 
 cp myconfig.txt myconfig_$3.txt
-tar -czvf plots_$3.tar.gz plots
-tar -czvf images_$3.tar.gz images
-tar -czvf caltables_$3.tar.gz caltables
-tar -czvf outputMMS_$3.tar.gz *mms*
+
+for f in %fieldnames
+do
+  echo ">>> compressing $f"
+  tar -czvf $f_plots_$3.tar.gz plots*$f
+  tar -czvf $f_images_$3.tar.gz images*$f
+  tar -czvf $f_caltables_$3.tar.gz caltables*$f
+  tar -czvf $f_outputMMS_$3.tar.gz *$f.mms*
+done
 
 /bin/ls -la

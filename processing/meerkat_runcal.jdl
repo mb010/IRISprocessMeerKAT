@@ -13,11 +13,20 @@ Platform = "EL7";
 Parameters = {"880.0~930.0MHz", "930.0~980.0MHz", "980.0~1030.0MHz", "1030.0~1080.0MHz", "1080.0~1130.0MHz", "1130.0~1180.0MHz", "1280.0~1330.0MHz", "1330.0~1380.0MHz", "1380.0~1430.0MHz", "1430.0~1480.0MHz", "1480.0~1530.0MHz", "1630.0~1680.0MHz"};
 
 OutputSE = "UKI-NORTHGRID-MAN-HEP-disk";
-OutputData = {"%output_data_loc/images_%s.tar.gz",
-"%output_data_loc/caltables_%s.tar.gz",
-"%output_data_loc/outputMMS_%s.tar.gz"};
+OutputData = {
+"%output_data_loc/%fieldname_images_%s.tar.gz",
+"%output_data_loc/%fieldname_caltables_%s.tar.gz",
+"%output_data_loc/%fieldname_outputMMS_%s.tar.gz"
+};
 
-OutputSandbox = {"StdOut", "StdErr", "myconfig_%s.txt", "plots_%s.tar.gz", "prmon.txt"};
+OutputSandbox = {
+"StdOut",
+"StdErr",
+"myconfig_%s.txt",
+"%fieldname_plots_%s.tar.gz",
+"prmon.txt"
+};
+
 StdOutput = "StdOut";
 StdError = "StdErr";
 ]
