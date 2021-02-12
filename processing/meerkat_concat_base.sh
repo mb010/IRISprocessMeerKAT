@@ -55,7 +55,7 @@ echo ">>> data set successfully extracted"
 # mms data in SPW directory / images in images directory
 echo ">>> extracting images"
 
-for file in images_*.tar.gz; do
+for file in *images_*.tar.gz; do
 tar -xvzf $file
 dirname="${file%.tar.gz}"
 end=${#dirname}
@@ -69,7 +69,7 @@ done
 
 echo ">>> extracting caltables"
 
-for file in caltables_*.tar.gz; do
+for file in *caltables_*.tar.gz; do
 tar -xvzf $file
 dirname="${file%.tar.gz}"
 end=${#dirname}
@@ -80,7 +80,7 @@ done
 
 echo ">>> extracting MMS data"
 
-for file in outputMMS_*.tar.gz; do
+for file in *outputMMS_*.tar.gz; do
 tar -xvzf $file
 dirname="${file%.tar.gz}"
 end=${#dirname}
@@ -104,8 +104,8 @@ time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casame
 
 cp myconfig.txt myconfig_$1.txt
 tar -czvf fullSPWplots.tar.gz plots
-tar -czvf combinedMMS.tar.gz *.mms
-tar -cvzf combinedFITS.tar.gz *.fits
-tar -cvzf combinedCUBE.tar.gz *.contcube
+tar -czvf %fieldname_combinedMMS.tar.gz *.mms
+tar -cvzf %fieldname_combinedFITS.tar.gz *.fits
+tar -cvzf %fieldname_combinedCUBE.tar.gz *.contcube
 
 /bin/ls -la

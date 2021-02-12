@@ -18,28 +18,36 @@ clean = True
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 
-def parameter_update(filename, tag, inp_list):
+def update_file(filename, tag, inp_list, outfile = None):
     """Updates lines of a file which contain tag to contain multiple lines
-	which cover the whole inp_list.
-    Arguments:
-    - filename (str) is the name of the file to be update.
-    - tag (str) is the key which will be used to determine which lines (and
-	where) need to be updated.
-    - inp_list (list of str) is the elements which will replace the tag
+    which cover the whole inp_list.
+    Keyword arguments:
+    filename -- (str) is the name of the file to be update.
+    - tag -- (str) is the key which will be used to determine which lines (and
+    where) need to be updated.
+    inp_list -- (list of str, or str) is the elements which will replace the tag
+    outfile -- Name of the file to write to, standard is to overwrite filename.
     """
+    if outfile==None:
+        outfile = filename
     with open(filename, 'r') as file:
         content = file.readlines()
     # Check each line for tag and replace / append as reuquired
     for idx, line in enumerate(content):
         found = line.find(tag)
         if found > -1:
-            tmp = line.replace(tag,inp_list[0]).rstrip(" \n,")+",\n"
-            for n in inp_list[1:]:
-                tmp += line.replace(tag, n).rstrip(" \n,")+",\n"
+            if type(inp_list)==list:
+                tmp = line.replace(tag, inp_list[0])
+                if len(inp_list)>1:
+                    tmp = tmp.rstrip(" \n,")+",\n"
+                    for n in inp_list[1:]:
+                        tmp += line.replace(tag, n).rstrip(" \n,")+",\n"
+            else:
+                tmp = line.replace(tag, inp_list)
             content[idx] = tmp
     out = "".join(content) # String for writing out.
     out = out.replace(",\n}", "\n}") # Remove commas if at end of a block.
-    with open(filename, 'w') as w:
+    with open(outfile, 'w') as w:
         w.write(out)
 
 # ---------------------------------------------------------------------
@@ -123,7 +131,7 @@ def run_precal():
 			if line.find("targetfields")>-1: targetfields = line.split()[-1]
 			if line.find("extrafields")>-1: extrafields = line.split()[-1]
 			if line.find("polfield")>-1: polfield = line.split()[-1]
-
+			if line.find("fieldnames")>-1: os.system('echo "'+line+'" >> myconfig.txt \n')
 
 		os.system("mv myconfig.txt .tmp \n")
 		configfile = open('myconfig.txt',"w")
@@ -175,12 +183,9 @@ def run_runcal():
 	    if idx<len(fnames)-1:
 	        bash_fieldnames += " "
 	# Update names of tar balls in .sh
-	with open("meerkat_runcal.sh", 'w') as w:
-		with open("meerkat_runcal.sh", 'r') as r:
-			for line in r:
-				line.replace("%fieldnames", bash_fieldnames)
+	update_file("meerkat_runcal.sh", "%fieldname", bash_fieldnames)
 	# Update names of .jdl output
-	parameter_update("tmp_runcal.jdl", "%fieldname", fieldnames)
+	update_file("meerkat_runcal_base.jdl", "%fieldname", fieldnames)
 
 	# submit job:
 	os.system("dirac-wms-job-submit meerkat_runcal.jdl > .tmp \n")
@@ -250,24 +255,49 @@ def run_slfcal():
 
 def run_concat():
 
-	# submit job:
-	os.system("dirac-wms-job-submit meerkat_concat.jdl > .tmp \n")
-	jobid_slfcal = get_jobid('.tmp')
-	print("Running concat: "+jobid_slfcal)
+	fieldnames = get_fieldnames('myconfig.txt')
+	# Loop over file name
+	for fieldname in fieldnames:
+		# Update .sh and .jdl
+		update_file("meerkat_concat_base.sh", "%fieldname", fieldname, outfile="meerkat_concat.sh")
+		update_file("meerkat_concat_base.jdl", "%fieldname", fieldname, outfile="job.jdl")
+		# If field is target field, use 32 processors.
+		if fieldname == "%targetfield": # FIX THIS
+			update_file("job.jdl", "16Processors", "32Processors")
+
+		# submit job:
+		jobid_concat = []
+		os.system("dirac-wms-job-submit job.jdl > .tmp \n")
+		jobid_concat.append(get_jobid('.tmp'))
+	os.system("rm job.jdl")
+	print("Running concat: "+jobid_concat)
 
 	# get job status:
 	while True:
-		os.system("dirac-wms-job-status "+jobid_slfcal+" > .tmp\n")
-		finished, success = get_status('.tmp')
-		if finished:
+		finished, success = [], []
+		for jobid in jobid_concat:
+			jobid = jobid.rstrip(',').rstrip(']').lstrip('[')
+			os.system("dirac-wms-job-status "+jobid+" > .tmp\n")
+			f, s = get_status('.tmp')
+			finished.append(f)
+			success.append(s)
+
+		if all(finished):
 			break
 
 	# check status:
-	if success:
-		print("concat:", success)
+	if all(success):
+		print("concat:", success[0])
+
+		# update config file: NOT SURE I NEED TO DO THIS (I dont think I do at least... double check.)
+		#os.system("dirac-wms-job-get-output "+jobid+" \n")
+		#os.system("mv "+jobid+"/myconfig* .tmp")
+		#for i, line in enumerate(open('.tmp')):
+		#	if line.find("fieldnames")>-1: os.system('echo "'+line+'" >> myconfig.txt \n')
+		#os.system("rm -r "+jobid+" \n")
 	else:
 		print("concat:", success)
-		print("Check logs to determine error. JobID: "+jobid_slfcal)
+		print("Check logs to determine error. JobID: "+jobid_concat)
 		sys.exit()
 
 		os.system("rm .tmp \n")
@@ -278,13 +308,15 @@ def run_concat():
 
 def run_clean():
 
-
 	# update config file for clean:
 	#os.system("dirac-wms-job-get-output "+jobid_precal+" \n") # Gets output files
 	os.system("cp myconfig.txt .config_tmp \n")
 	for i, line in enumerate(open('.config_tmp')):
 		if line.find("targetfields")> -1: targetfield_int = int(line.split()[-1].strip(",[]'"))
 		if line.find("fieldnames")> -1: targetfield_str = line.split()[2:][targetfield_int].strip("',[]")
+
+	update_file("meerkat_clean.jdl", "%fieldname", targetfield_str.strip("J"))
+	update_file("meerkat_clean.sh", "%fieldname", targetfield_str_.strip("J"))
 
 	configfile = open('myconfig.txt',"w")
 	for i, line in enumerate(open('.config_tmp')):
@@ -299,7 +331,7 @@ def run_clean():
 	# submit job:
 	os.system("dirac-wms-job-submit meerkat_clean.jdl > .tmp \n")
 	os.system("cp .config_tmp myconfig.txt")
-	os.system("rm -r .config_tmp \n")
+	os.system("rm .config_tmp \n")
 
 	jobid_clean = get_jobid('.tmp')
 	print(jobid_clean)

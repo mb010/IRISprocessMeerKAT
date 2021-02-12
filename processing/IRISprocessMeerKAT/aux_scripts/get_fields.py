@@ -24,15 +24,15 @@ me = casac.casac.measures()
 # ========================================================================================================
 
 def read_fields(MS):
-    
+
     """Extract field numbers from intent, including calibrators for bandpass, flux, phase & amplitude, and the target. Only the
         target allows for multiple field IDs, while all others extract the field with the most scans and put all other IDs as target fields.
-        
+
         Arguments:
         ----------
         MS : str
         Input measurement set (relative or absolute path).
-        
+
         Returns:
         --------
         fieldIDs : dict
@@ -44,24 +44,24 @@ def read_fields(MS):
         Field for phase calibration.
         targetfields : int
         Target field."""
-    
+
     fieldIDs = {}
     extra_fields = []
-    
+
     # open MS:
     msmd.open(MS)
-    
+
     #Set default for any missing intent as field for intent CALIBRATE_FLUX
     default = msmd.fieldsforintent('CALIBRATE_FLUX')
     if default.size == 0:
         logger.error('You must have a field with intent "CALIBRATE_FLUX". I found {0} in dataset "{1}".'.format(default.size,MS))
         return fieldIDs
-    
+
     #Use 'CALIBRATE_PHASE' or if missing, 'CALIBRATE_AMPLI'
     phasecal_intent = 'CALIBRATE_PHASE'
     if phasecal_intent not in msmd.intents():
         phasecal_intent = 'CALIBRATE_AMPLI'
-    
+
     fieldIDs['fluxfield'] = get_field(MS,'CALIBRATE_FLUX','fluxfield',extra_fields)
     fieldIDs['bpassfield'] = get_field(MS,'CALIBRATE_BANDPASS','bpassfield',extra_fields,default=default)
     fieldIDs['phasecalfield'] = get_field(MS,phasecal_intent,'phasecalfield',extra_fields,default=default)
@@ -70,7 +70,7 @@ def read_fields(MS):
     #Put any extra fields in target fields
     if len(extra_fields) > 0:
         fieldIDs['extrafields'] = "'{0}'".format(','.join([str(extra_fields[i]) for i in range(len(extra_fields))]))
-    
+
     msmd.done()
 
     return fieldIDs
@@ -78,10 +78,10 @@ def read_fields(MS):
 # ========================================================================================================
 
 def get_field(MS,intent,fieldname,extra_fields,default=0,multiple=False):
-    
+
     """Extract field IDs based on intent. When multiple fields are present, if multiple is True, return a
         comma-seperated string, otherwise return a single field string corresponding to the field with the most scans.
-        
+
         Arguments:
         ----------
         MS : str
@@ -96,14 +96,14 @@ def get_field(MS,intent,fieldname,extra_fields,default=0,multiple=False):
         Default field to return if intent missing.
         multiple : bool, optional
         Allow multiple fields?
-        
+
         Returns:
         --------
         fieldIDs : str
         Extracted field ID(s), comma-seperated for multiple fields."""
-    
+
     fields = msmd.fieldsforintent(intent)
-    
+
     if fields.size == 0:
         logger.warn('Intent "{0}" not found in dataset "{1}". Setting to "{2}"'.format(intent,MS,default))
         fieldIDs = "'{0}'".format(default)
@@ -111,7 +111,7 @@ def get_field(MS,intent,fieldname,extra_fields,default=0,multiple=False):
         fieldIDs = "'{0}'".format(fields[0])
     else:
         logger.info('Multiple fields found with intent "{0}" in dataset "{1}" - {2}.'.format(intent,MS,fields))
-        
+
         if multiple:
             logger.info('Will use all of them for "{0}".'.format(fieldname))
             fieldIDs = "'{0}'".format(','.join([str(fields[i]) for i in range(fields.size)]))
@@ -138,15 +138,18 @@ def get_field(MS,intent,fieldname,extra_fields,default=0,multiple=False):
 # ========================================================================================================
 
 def main(args,taskvals):
-    
+
     visname = va(taskvals, "data", "vis", str)
     fields = read_fields(visname)
-    
+
     if len(fields)>0:
         config_parser.overwrite_config(args['config'], conf_dict=fields, conf_sec='fields')
-        
+
         logger.info('[fields] section written to "{0}". Edit this section if you need to change field IDs (comma-separated string for multiple IDs, not supported for calibrators).'.format(args['config']))
-    
+        msmd.open(visname)
+        fnames = msmd.namesforfields()
+        config_parser.overwrite_config(args['config'], conf_dict={'fieldnames': "{0}".format(fnames)}, conf_sec='run', sec_comment='# Internal variables for pipeline execution')
+
     else:
         logger.info('No updated [fields] section written to "{0}". Edit this section manually (comma-separated string for multiple IDs, not supported for calibrators).'.format(args['config']))
 
@@ -156,5 +159,5 @@ def main(args,taskvals):
 # ========================================================================================================
 
 if __name__ == '__main__':
-    
+
     bookkeeping.run_script(main)

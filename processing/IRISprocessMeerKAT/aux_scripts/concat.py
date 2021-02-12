@@ -152,7 +152,7 @@ def main(args,taskvals):
     nspw = va(taskvals, 'crosscal', 'nspw', int, default='')
     fields = bookkeeping.get_field_ids(taskvals['fields'])
     dirs = config_parser.parse_spw(args['config'])[3]
-    
+
     if ',' in spw:
         newvis = do_concat(visname, fields, dirs)
         config_parser.overwrite_config(args['config'], conf_dict={'vis' : "'{0}'".format(newvis)}, conf_sec='data')

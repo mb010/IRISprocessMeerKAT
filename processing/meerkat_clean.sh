@@ -43,8 +43,8 @@ echo ">>> scripts successfully extracted"
 #tar -czvf combinedMMS.tar.gz *.mms
 #tar -cvzf combinedFITS.tar.gz *.fits
 #tar -cvzf combinedCUBE.tar.gz *.contcube
-tar -xzvf combinedMMS.tar.gz
-mv combinedMMS/* ./
+tar -xzvf *combinedMMS.tar.gz
+mv *combinedMMS/* ./
 /bin/ls -lah
 echo ">>> MMS extracted (I think, check above to make sure)"
 
@@ -101,22 +101,22 @@ echo ">>> MMS extracted (I think, check above to make sure)"
 #done
 
 /bin/rm *.tar.gz
-/bin/ls -lah
 echo ">>> data sets successfully extracted"
+/bin/ls -lah
 # ========================================================
 
 #echo ">>> executing concat on data"
 #time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg casa --log2term -c aux_scripts/concat.py --config myconfig.txt
 
-echo ">>> listing folders to show what concat.py has created"
-/bin/ls -lah
+#echo ">>> listing folders to show what concat.py has created"
+#/bin/ls -lah
 
 # Should make config file contain field ids - Need the ids *before* I submit the jdl. -.-
 #echo ">>> executing get_fields on data"
 #time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C meerkat.xvfb.simg casa --log2term -c aux_scripts/get_fields.py --config myconfig.txt
 
-echo ">>> ATTEMPT1 executing selfcal_part1 on data"
-#time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c crosscal_scripts/quick_tclean.py --config myconfig.txt # Snippet as reference from 
+echo ">>> executing selfcal_part1 on data (i.e. clean)"
+#time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c crosscal_scripts/quick_tclean.py --config myconfig.txt # Snippet as reference from
 time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/selfcal_part1.py --config myconfig.txt
 #time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg xvfb-run -d casa --log2term -c selfcal_scripts/selfcal_part1.py --config myconfig.txt
 
@@ -127,7 +127,6 @@ time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casame
 # create outputs:
 
 cp myconfig.txt myconfig_$1.txt
-tar -cvzf combinedCLEANED.tar.gz *_im_*
+tar -cvzf %fieldname_combinedCLEANED.tar.gz *_im_*
 
 /bin/ls -lah
-
