@@ -126,20 +126,29 @@ def update_clean_sh(ms_name):
     # Generate correct order & number of selfcal, bdsf and pixmask calls.
     scripts_ = ["selfcal_part1.py", "selfcal_part2.py", "run_bdsf.py", "make_pixmask.py"]
     scripts = []
-    scripts = scripts_*nloops + [scripts_[0]]
+    scripts = scripts_*nloops + "selfcal_final.py"
 
     # Use list of calls to generate correct bash calls.
     base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     base_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg xvfb-run -d casa --log2term -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     # Generate full list of commands to append for selfcalibration.
+    secondary_loop = False
     content = ""
-    for script_name in scripts:
+    for idx, script_name in enumerate(scripts):
+        if idx%len(scripts_)==0:
+            content +='\n'
         content += f'echo ">>> executing {script_name} on data"\n'
-        if "selfcal_part1.py" == script_name:
+        # Use the correct call for each script
+        if "selfcal_part1.py" == script_name or "selfcal_final.py" == script_name:
             content += base_mpi.replace("SCRIPT_NAME", script_name)
         elif "run_bdsf.py" == script_name:
             content += python_single_thread.replace("SCRIPT_NAME", script_name)
+            # If a full loop has occured, then we can remove the previous working documents
+            if secondary_loop:
+                content += 'echo ">>> cleaning directory"\nrm -r *.mms_im_*\n'
+            else:
+                secondary_loop = True
         else:
             content += base_single_thread.replace("SCRIPT_NAME", script_name)
     update_file(file_path, "%script_calls", content)
@@ -154,13 +163,20 @@ if __name__ == "__main__":
     """
 
     PATHS = {
-        'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
-        #'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
+        #'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
+        'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
         #'ms_name': "1538942495_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS13 1538942495
         'container_loc':"LFN:/skatelescope.eu/user/a/anna.scaife/meerkat",
         'user': "micah.bowles",
         'out_base': "LFN:/skatelescope.eu/user"
     }
-
+    
+    if PATHS['ms_name'] == "1491550051":
+        do_pol = 'False'
+    else:
+        do_pol = 'True'
+    
     update_jdls(**PATHS)
     update_clean_sh(PATHS["ms_name"])
+    update_file(f"pipelines/{PATHS["ms_name"]}/myconfig.txt", '%do_pol', do_pol)
+
