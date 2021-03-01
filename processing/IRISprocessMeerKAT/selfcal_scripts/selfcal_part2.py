@@ -48,7 +48,7 @@ def predict_model(vis, imagename, imsize, cell, gridder, wprojplanes,
         os.rename(name+'.round1'+ext,fname)
 
 def selfcal_part2(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, niter, threshold,
-                multiscale, nterms, gridder, deconvolver, solint, calmode, atrous, refant, loop, do_pol):
+                multiscale, nterms, gridder, deconvolver, solint, calmode, atrous, refant, loop, dopol):
 
     basename = vis.replace('.ms', '') + '_im_%d'
     imagename = basename % (loop + restart_no)

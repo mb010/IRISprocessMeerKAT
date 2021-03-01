@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)-15s %(levelname)s: %(message)s", level=logging.INFO)
 
 def selfcal_final(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, niter, threshold,
-        multiscale, nterms, gridder, deconvolver, solint, calmode, atrous, loop, refant, do_pol):
+        multiscale, nterms, gridder, deconvolver, solint, calmode, atrous, loop, refant, dopol):
 
     visbase = os.path.split(vis)[1] # Get only vis name, not entire path
     basename = visbase.replace('.ms', '') + '_im_%d' # Images will be produced in $CWD
@@ -47,7 +47,7 @@ def selfcal_final(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
                     extendpols=False, growaround=False, flagneartime=False, flagnearfreq=False,
                     action='apply', flagbackup=True, overwrite=True, writeflags=True)
         
-        if do_pol: imagename += 'I'
+        if dopol: imagename += 'I'
         tclean(vis=vis, selectdata=False, datacolumn='corrected', imagename=imagename,
             imsize=imsize[loop], cell=cell[loop], stokes='I', gridder=gridder[loop],
             wprojplanes = wprojplanes[loop], deconvolver = deconvolver[loop], restoration=True,
@@ -55,7 +55,7 @@ def selfcal_final(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
             threshold=threshold[loop], nterms=nterms[loop],
             savemodel='none', pblimit=-1, mask=pixmask, parallel = True)
         
-        if do_pol:
+        if dopol:
             tclean(vis=vis, selectdata=False, datacolumn='corrected', imagename=imagename[:-1]+'Q',
                 imsize=imsize[loop], cell=cell[loop], stokes='Q', gridder=gridder[loop],
                 wprojplanes = wprojplanes[loop], deconvolver = deconvolver[loop], restoration=True,
