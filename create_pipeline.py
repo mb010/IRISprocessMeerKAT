@@ -126,7 +126,7 @@ def update_clean_sh(ms_name):
     # Generate correct order & number of selfcal, bdsf and pixmask calls.
     scripts_ = ["selfcal_part1.py", "selfcal_part2.py", "run_bdsf.py", "make_pixmask.py"]
     scripts = []
-    scripts = scripts_*nloops + "selfcal_final.py"
+    scripts = scripts_*nloops + ["selfcal_final.py"]
 
     # Use list of calls to generate correct bash calls.
     base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
@@ -163,8 +163,8 @@ if __name__ == "__main__":
     """
 
     PATHS = {
-        #'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
-        'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
+        'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
+        #'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
         #'ms_name': "1538942495_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS13 1538942495
         'container_loc':"LFN:/skatelescope.eu/user/a/anna.scaife/meerkat",
         'user': "micah.bowles",
@@ -178,5 +178,5 @@ if __name__ == "__main__":
     
     update_jdls(**PATHS)
     update_clean_sh(PATHS["ms_name"])
-    update_file(f"pipelines/{PATHS["ms_name"]}/myconfig.txt", '%do_pol', do_pol)
+    update_file(f"pipelines/{PATHS['ms_name']}/myconfig.txt", '%do_pol', do_pol)
 
