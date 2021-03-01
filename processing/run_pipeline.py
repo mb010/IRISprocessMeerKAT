@@ -9,10 +9,10 @@ import time
 
 
 # options for debugging purposes
-precal = True
-runcal = True
+precal = False
+runcal = False
 slfcal = False
-concat = True
+concat = False
 clean = True
 
 # ---------------------------------------------------------------------

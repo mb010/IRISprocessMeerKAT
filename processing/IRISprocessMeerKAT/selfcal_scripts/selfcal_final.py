@@ -80,7 +80,7 @@ def selfcal_final(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
 if __name__ == '__main__':
 
     args, params = bookkeeping.get_selfcal_params()
-    selfcal_part1(**params)
+    selfcal_final(**params)
 
 
 """
