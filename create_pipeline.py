@@ -1,6 +1,44 @@
 import os
 import warnings
 
+def update_file(filename, tag, inp_list, outfile = None):
+    """Updates lines of a file which contain tag to contain multiple lines
+    which cover the whole inp_list.
+    Arguments:
+	----------
+    filename : str
+		The name of the file to be update.
+    tag : str
+		The key which will be used to determine which lines (and
+    	where) need to be updated.
+    inp_list : list of str, or str
+	 	The elements which will replace the tag, if list new lines will be
+		appended with same each element.
+    outfile : str
+		Name of the file to write to, standard is to overwrite filename (None).
+    """
+    if outfile==None:
+        outfile = filename
+    with open(filename, 'r') as file:
+        content = file.readlines()
+    # Check each line for tag and replace / append as reuquired
+    for idx, line in enumerate(content):
+        found = line.find(tag)
+        if found > -1:
+            if type(inp_list)==list:
+                tmp = line.replace(tag, inp_list[0])
+                if len(inp_list)>1:
+                    tmp = tmp.rstrip(" \n,")+",\n"
+                    for n in inp_list[1:]:
+                        tmp += line.replace(tag, n).rstrip(" \n,")+",\n"
+            else:
+                tmp = line.replace(tag, inp_list)
+            content[idx] = tmp
+    out = "".join(content) # String for writing out.
+    out = out.replace(",\n}", "\n}") # Remove commas if at end of a block.
+    with open(outfile, 'w') as w:
+        w.write(out)
+
 def update_jdls(ms_name,
                 ms_loc,
                 container_loc,
@@ -15,11 +53,16 @@ def update_jdls(ms_name,
 
     Arguments:
     ----------
-     - ms_name: Name of the balled (.tar.gz) original measurement set file (e.g. "1491550051").
-     - ms_loc: Path within the IRIS catalog of the measurement set.
-     - container_loc = Folder path of the two containers required for processing (i.e. PATH in PATH/meerkat.xvfb.simg and PATH/casameer-5.4.1.xvfb.simg).
-     - user: Path of the user where the output data is saved.
-     - out_base: Path at which the user info is input. Usually: "LFN:/skatelescope.eu/user"
+     ms_name : str
+        Name of the balled (.tar.gz) original measurement set file (e.g. "1491550051").
+     ms_loc : str
+        Path within the IRIS catalog of the measurement set.
+     container_loc : str
+        Folder path of the two containers required for processing (i.e. PATH in PATH/meerkat.xvfb.simg and PATH/casameer-5.4.1.xvfb.simg).
+     user :
+        Path of the user where the output data is saved.
+     out_base : str
+        Path at which the user info is input. Usually: "LFN:/skatelescope.eu/user"
     """
 
     # Prepare useable paths
@@ -46,38 +89,60 @@ def update_jdls(ms_name,
     os.system(f"mv pipelines/{ms_name}/default_config.txt pipelines/{ms_name}/myconfig.txt")
 
     # Iterate through files and append the appropriate paths
+    tags = [
+        ["%ms_name", ms_name],
+        ["%ms_loc", ms_loc],
+        ["%container_loc", container_loc],
+        ["%output_data_loc", output_data_loc]
+    ]
     for name in os.listdir(f"pipelines/{ms_name}/"):
         # Use tags to insert correct paths
         if (('meerkat' in name) and ('.jdl' in name)) or ('myconfig.txt' in name):
             path = f"pipelines/{ms_name}/{name}"
-            os.system(f"cp {path} .tmp")
-            while True: # Wait for above to finish
-                if os.path.isfile(".tmp"):
-                    break
-            with open(path, 'w') as w:
-                with open('.tmp', 'r') as r:
-                    for idx, line in enumerate(r):
-                        line = line.replace("%ms_name", ms_name)
-                        line = line.replace("%ms_loc", ms_loc)
-                        line = line.replace("%container_loc", container_loc)
-                        line = line.replace("%output_data_loc", output_data_loc)
-                        w.write(line)
+            for tag in tags:
+                update_file(path, tag[0], tag[1])
 
-        # Name visibility key in myconfig.txt
-        #elif 'myconfig.txt' in name:
-        #    path = f"pipelines/{ms_name}/{name}"
-        #    os.system(f"cp {path} .tmp")
-        #    with open(path, 'w') as w:
-        #        with open('.tmp', 'r') as r:
-        #            for idx, line in enumerate(r):
-        #                if "vis = ''" in line:
-        #                    line = line.replace("vis = ''", f"vis = 'data/{ms_name}.ms'")
-        #                    w.write(line)
+    # Find nloops
+    config_path = f"pipelines/{ms_name}/myconfig.txt"
+    path = f"pipelines/{ms_name}/meerkat_clean.sh"
+
+    # Updating Selfcal scripts according to nloops:
+    with open(config_path, 'r') as r:
+        content = r.readlines()
+
 
     # Clean up temporary file and print warning
-    os.system(f"rm .tmp")
     print(f"""Files created in {ms_name}\nThe .jdl output will be saved to {output_data_loc}
 Note: This path must exist before submiting .jdls!""")
+
+def update_clean_sh(ms_name):
+    """Updates the clean.sh script to contain the correct number selfcalibration loops."""
+    file_path = f"pipelines/{ms_name}/meerkat_clean.sh"
+    with open(f"pipelines/{ms_name}/myconfig.txt", 'r') as r:
+        content = r.readlines()
+    for line in content:
+        if line[:6] == "nloops":
+            nloops = int(line.split()[2])
+    # Generate correct order & number of selfcal, bdsf and pixmask calls.
+    scripts_ = ["selfcal_part1.py", "selfcal_part2.py", "run_bdsf.py", "make_pixmask.py"]
+    scripts = []
+    scripts = scripts_*nloops + [scripts_[0]]
+
+    # Use list of calls to generate correct bash calls.
+    base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    base_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg xvfb-run -d casa --log2term -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    # Generate full list of commands to append for selfcalibration.
+    content = ""
+    for script_name in scripts:
+        content += f'echo ">>> executing {script_name} on data"\n'
+        if "selfcal_part1.py" == script_name:
+            content += base_mpi.replace("SCRIPT_NAME", script_name)
+        elif "run_bdsf.py" == script_name:
+            content += python_single_thread.replace("SCRIPT_NAME", script_name)
+        else:
+            content += base_single_thread.replace("SCRIPT_NAME", script_name)
+    update_file(file_path, "%script_calls", content)
 
 if __name__ == "__main__":
     """To create a set of processing files for a given data set,
@@ -89,8 +154,8 @@ if __name__ == "__main__":
     """
 
     PATHS = {
-        #'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
-        'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
+        'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
+        #'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
         #'ms_name': "1538942495_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS13 1538942495
         'container_loc':"LFN:/skatelescope.eu/user/a/anna.scaife/meerkat",
         'user': "micah.bowles",
@@ -98,3 +163,4 @@ if __name__ == "__main__":
     }
 
     update_jdls(**PATHS)
+    update_clean_sh(PATHS["ms_name"])

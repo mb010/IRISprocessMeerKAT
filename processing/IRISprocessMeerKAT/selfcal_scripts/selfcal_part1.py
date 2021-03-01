@@ -29,6 +29,7 @@ def selfcal_part1(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
     pixmask = basename % (loop + restart_no) + ".pixmask"
     caltable = vis.replace('.ms', '') + '.gcal%d' % (loop + restart_no - 1)
     all_caltables = sorted(glob.glob('*.gcal?'))
+    print(">>> loop number: {0}".format(loop))
 
     if loop > 0 and not os.path.exists(caltable):
         logger.error("Calibration table {0} doesn't exist, so self-calibration loop {1} failed. Will terminate selfcal process.".format(caltable,loop))
@@ -47,18 +48,17 @@ def selfcal_part1(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
                     action='apply', flagbackup=True, overwrite=True, writeflags=True)
 
         tclean(vis=vis, selectdata=False, datacolumn='corrected', imagename=imagename,
-            imsize=imsize[loop], cell=cell[loop], stokes='IQUV', gridder=gridder[loop],
+            imsize=imsize[loop], cell=cell[loop], stokes='I', gridder=gridder[loop],
             wprojplanes = wprojplanes[loop], deconvolver = deconvolver[loop], restoration=True,
             weighting='briggs', robust = robust[loop], niter=niter[loop], scales=multiscale[loop],
             threshold=threshold[loop], nterms=nterms[loop],
             savemodel='none', pblimit=-1, mask=pixmask, parallel = True)
 
 
+
 if __name__ == '__main__':
 
-    args,params = bookkeeping.get_selfcal_params() 
-    print('parameters:\n', params)
-    # Check if this works with current set up.
+    args, params = bookkeeping.get_selfcal_params()
     selfcal_part1(**params)
 
 

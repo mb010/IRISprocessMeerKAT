@@ -5,6 +5,7 @@ import sys
 import glob
 import shutil
 import os
+sys.path.append(os.getcwd())
 
 from utils import config_parser
 from utils.config_parser import validate_args as va
@@ -84,12 +85,14 @@ def selfcal_part2(vis, nloops, restart_no, cell, robust, imsize, wprojplanes, ni
                     normtype='median', gaintable=prev_caltables, calmode=calmode[loop], append=False, parang=False)
 
             loop += 1
+        else:
+            logger.warning("No pixmask found at '{0}'. This should only occur for the 0th loop. Else, selfcal was not completed correctly.".format(pixmask))
 
         return loop
 
 
 if __name__ == '__main__':
 
-    args,params = bookkeeping.get_selfcal_params()
+    args, params = bookkeeping.get_selfcal_params()
     loop = selfcal_part2(**params)
     config_parser.overwrite_config(args['config'], conf_dict={'loop' : loop},  conf_sec='selfcal')

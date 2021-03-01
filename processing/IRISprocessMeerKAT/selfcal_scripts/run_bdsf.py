@@ -5,16 +5,21 @@ import sys
 import glob
 import shutil
 import os
+sys.path.append(os.getcwd())
 
-import config_parser
-from config_parser import validate_args as va
-import bookkeeping
-import processMeerKAT
+from utils import config_parser
+from utils.config_parser import validate_args as va
+from utils import bookkeeping
+
+#import config_parser
+#from config_parser import validate_args as va
+#import bookkeeping
+#import processMeerKAT
 
 import logging
 import bdsf
-
-
+from time import gmtime
+logging.Formatter.converter = gmtime
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)-15s %(levelname)s: %(message)s", level=logging.INFO)
 

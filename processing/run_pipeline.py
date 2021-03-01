@@ -9,13 +9,52 @@ import time
 
 
 # options for debugging purposes
-precal = False
-runcal = False
+precal = True
+runcal = True
 slfcal = False
 concat = True
 clean = True
 
 # ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+def update_file(filename, tag, inp_list, outfile = None):
+    """Updates lines of a file which contain tag to contain multiple lines
+    which cover the whole inp_list.
+    Arguments:
+	----------
+    filename : str
+		The name of the file to be update.
+    tag : str
+		The key which will be used to determine which lines (and
+    	where) need to be updated.
+    inp_list : list of str, or str
+	 	The elements which will replace the tag, if list new lines will be
+		appended with same each element.
+    outfile : str
+		Name of the file to write to, standard is to overwrite filename (None).
+    """
+    if outfile==None:
+        outfile = filename
+    with open(filename, 'r') as file:
+        content = file.readlines()
+    # Check each line for tag and replace / append as reuquired
+    for idx, line in enumerate(content):
+        found = line.find(tag)
+        if found > -1:
+            if type(inp_list)==list:
+                tmp = line.replace(tag, inp_list[0])
+                if len(inp_list)>1:
+                    tmp = tmp.rstrip(" \n,")+",\n"
+                    for n in inp_list[1:]:
+                        tmp += line.replace(tag, n).rstrip(" \n,")+",\n"
+            else:
+                tmp = line.replace(tag, inp_list)
+            content[idx] = tmp
+    out = "".join(content) # String for writing out.
+    out = out.replace(",\n}", "\n}") # Remove commas if at end of a block.
+    with open(outfile, 'w') as w:
+        w.write(out)
+
 # ---------------------------------------------------------------------
 
 def get_jobid(filename):
