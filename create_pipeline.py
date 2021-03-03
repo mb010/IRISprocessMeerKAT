@@ -129,9 +129,9 @@ def update_clean_sh(ms_name):
     scripts = scripts_*nloops + ["selfcal_final.py"]
 
     # Use list of calls to generate correct bash calls.
-    base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
-    base_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg xvfb-run -d casa --log2term -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
-    python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casameer-5.4.1.xvfb.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    base_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg xvfb-run -d casa --log2term -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
+    python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     # Generate full list of commands to append for selfcalibration.
     secondary_loop = False
     content = ""
@@ -143,12 +143,12 @@ def update_clean_sh(ms_name):
         if "selfcal_part1.py" == script_name or "selfcal_final.py" == script_name:
             content += base_mpi.replace("SCRIPT_NAME", script_name)
         elif "run_bdsf.py" == script_name:
-            content += python_single_thread.replace("SCRIPT_NAME", script_name)
             # If a full loop has occured, then we can remove the previous working documents
             if secondary_loop:
                 content += 'echo ">>> cleaning directory"\nrm -r *.mms_im_*\n'
             else:
                 secondary_loop = True
+            content += python_single_thread.replace("SCRIPT_NAME", script_name)
         else:
             content += base_single_thread.replace("SCRIPT_NAME", script_name)
     update_file(file_path, "%script_calls", content)
@@ -172,11 +172,10 @@ if __name__ == "__main__":
     }
     
     if PATHS['ms_name'] == "1491550051":
-        do_pol = 'False'
+        dopol = 'False'
     else:
-        do_pol = 'True'
+        dopol = 'True'
     
     update_jdls(**PATHS)
     update_clean_sh(PATHS["ms_name"])
-    update_file(f"pipelines/{PATHS['ms_name']}/myconfig.txt", '%do_pol', do_pol)
-
+    update_file(f"pipelines/{PATHS['ms_name']}/myconfig.txt", '%dopol', dopol)

@@ -72,8 +72,8 @@ deconvolver = 'mtmfs'
 solint = ['10min','5min','2min','1min']
 calmode = 'p'
 atrous = True                     # Source find for diffuse emission (see PyBDSF docs)
-dopol = %do_pol                   # Activate polarisation calibration and imaging?
+dopol = %dopol                   # Activate polarisation calibration and imaging?
 
 [run]                             # Internal variables for pipeline execution
 continue = True
-dopol = %do_pol                   # Activate polarisation calibration and imaging?
+dopol = %dopol                   # Activate polarisation calibration and imaging?

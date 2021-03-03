@@ -1,7 +1,7 @@
 [
 JobName = "meerkat_clean";
 InputSandbox = {"meerkat_clean.sh", "myconfig.txt", "IRISprocessMeerKAT.tar.gz", "prmon_1.0.1_x86_64-static-gnu72-opt.tar.gz"};
-InputData = {"%container_loc/casameer-5.4.1.xvfb.simg",
+InputData = {"%container_loc/casa-stable.simg",
 "%output_data_loc/combinedMMS.tar.gz",
 "%output_data_loc/caltables_880.0~930.0MHz.tar.gz",
 "%output_data_loc/caltables_930.0~980.0MHz.tar.gz",
