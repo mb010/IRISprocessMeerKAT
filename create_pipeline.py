@@ -66,6 +66,7 @@ def update_jdls(ms_name,
     """
 
     # Prepare useable paths
+    #output_data_loc = f"{out_base}/{user[0]}/{user}/I/{ms_name}"
     output_data_loc = f"{out_base}/{user[0]}/{user}/{ms_name}"
     ms_loc = f"{ms_loc}/{ms_name}.ms.tar.gz"
     if not os.path.isdir("pipelines"):
@@ -126,31 +127,32 @@ def update_clean_sh(ms_name):
     # Generate correct order & number of selfcal, bdsf and pixmask calls.
     scripts_ = ["selfcal_part1.py", "selfcal_part2.py", "run_bdsf.py", "make_pixmask.py"]
     scripts = []
-    scripts = scripts_*nloops + ["selfcal_final.py"]
+    scripts = scripts_*(nloops+1) + ["selfcal_final.py"] # nloops+1 should continue to loop 4, instead of 3.
 
     # Use list of calls to generate correct bash calls.
     base_mpi = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg mpicasa -n $OMP_NUM_THREADS casa -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     base_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg xvfb-run -d casa --log2term -c selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     # Generate full list of commands to append for selfcalibration.
-    secondary_loop = False
+    loop_no = 0
     content = ""
     for idx, script_name in enumerate(scripts):
         if idx%len(scripts_)==0:
             content +='\n'
         content += f'echo ">>> executing {script_name} on data"\n'
         # Use the correct call for each script
-        if "selfcal_part1.py" == script_name or "selfcal_final.py" == script_name:
+        if "selfcal_" in script_name: # All contain calls of tclean (MPI function).
             content += base_mpi.replace("SCRIPT_NAME", script_name)
         elif "run_bdsf.py" == script_name:
-            # If a full loop has occured, then we can remove the previous working documents
-            if secondary_loop:
-                content += 'echo ">>> cleaning directory"\nrm -r *.mms_im_*\n'
-            else:
-                secondary_loop = True
             content += python_single_thread.replace("SCRIPT_NAME", script_name)
         else:
             content += base_single_thread.replace("SCRIPT_NAME", script_name)
+        if loop_no == 1:
+            content += f'echo ">>> cleaning directory *.mms_im_0_nomask*"\nfor file in *.mms_im_0_nomask*\ndo\n    if [[ $file == *"model"* ]]; then\n        rm -r $file\n    fi\ndone"""
+        elif loop_no > 1:
+            content += f'echo ">>> cleaning directory *.mms_im_{loop_no-1}*"\nfor file in *.mms_im_{loop_no-1}*\ndo\n    if [[ $file == *"model"* ]]; then\n        rm -r $file\n    fi\ndone"""
+        loop_no += 1
+
     update_file(file_path, "%script_calls", content)
 
 if __name__ == "__main__":
@@ -163,8 +165,8 @@ if __name__ == "__main__":
     """
 
     PATHS = {
-        'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
-        #'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
+        #'ms_name': "1491550051", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani/MeerKAT_DataSets", # DEEP2 1491550051
+        'ms_name': "1538856059_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS12 1538856059
         #'ms_name': "1538942495_sdp_l0", 'ms_loc': "LFN:/skatelescope.eu/user/p/priyaa.thavasimani", # XMMLSS13 1538942495
         'container_loc':"LFN:/skatelescope.eu/user/a/anna.scaife/meerkat",
         'user': "micah.bowles",
@@ -175,6 +177,7 @@ if __name__ == "__main__":
         dopol = 'False'
     else:
         dopol = 'True'
+    #dopol='False'
     
     update_jdls(**PATHS)
     update_clean_sh(PATHS["ms_name"])

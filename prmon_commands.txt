@@ -1,0 +1,5 @@
+# Processing Load:
+python3 prmon_plot.py --input prmon.txt --xvar wtime --yvar utime,stime --yunit SEC --diff --stacked
+
+# Memory Usage:
+python3 prmon_plot.py --input prmon.txt --xvar wtime --yvar vmem,pss,rss,swap --yunit GB
