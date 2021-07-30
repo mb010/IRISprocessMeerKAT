@@ -135,11 +135,16 @@ def update_clean_sh(ms_name):
     python_single_thread = f"time singularity exec --cleanenv --contain --home $PWD:/srv --pwd /srv -C casa-stable.simg python selfcal_scripts/SCRIPT_NAME --config myconfig.txt\n"
     # Generate full list of commands to append for selfcalibration.
     loop_no = 0
-    content = ""
+    content = """echo ">>> Change file limit"
+ulimit -n
+ulimit -n 16384
+ulimit -n
+"""
+    
     for idx, script_name in enumerate(scripts):
         if idx%len(scripts_)==0:
             content +='\n'
-        content += f'echo ">>> executing {script_name} on data"\n'
+        content += f'echo ">>> executing {script_name}"\n'
         # Use the correct call for each script
         if "selfcal_" in script_name: # All contain calls of tclean (MPI function).
             content += base_mpi.replace("SCRIPT_NAME", script_name)
@@ -147,10 +152,6 @@ def update_clean_sh(ms_name):
             content += python_single_thread.replace("SCRIPT_NAME", script_name)
         else:
             content += base_single_thread.replace("SCRIPT_NAME", script_name)
-        if loop_no == 1:
-            content += f'echo ">>> cleaning directory *.mms_im_0_nomask*"\nfor file in *.mms_im_0_nomask*\ndo\n    if [[ $file == *"model"* ]]; then\n        rm -r $file\n    fi\ndone"""
-        elif loop_no > 1:
-            content += f'echo ">>> cleaning directory *.mms_im_{loop_no-1}*"\nfor file in *.mms_im_{loop_no-1}*\ndo\n    if [[ $file == *"model"* ]]; then\n        rm -r $file\n    fi\ndone"""
         loop_no += 1
 
     update_file(file_path, "%script_calls", content)
@@ -177,7 +178,6 @@ if __name__ == "__main__":
         dopol = 'False'
     else:
         dopol = 'True'
-    #dopol='False'
     
     update_jdls(**PATHS)
     update_clean_sh(PATHS["ms_name"])
